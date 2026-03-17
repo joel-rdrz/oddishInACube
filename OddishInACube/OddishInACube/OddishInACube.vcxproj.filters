@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OddishInACube.cpp">
+    <ClCompile Include="src\OddishInACube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
