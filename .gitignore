@@ -1,0 +1,51 @@
+# Visual Studio / IDE specific files
+.vs/
+*.user
+*.suo
+*.db
+*.opendb
+*.VC.db
+*.sln.docstates
+
+# Intermediate build files and logs
+*.obj
+*.o
+*.pch
+*.pdb
+*.idb
+*.ilk
+*.tlog
+*.lastbuildstate
+*.unsuccessfulbuild
+*.log
+
+# Ignore standard build output folders
+[Dd]ebug/
+[Rr]elease/
+x64/Debug/
+x64/Release/
+x86/Debug/
+x86/Release/
+out/
+build/
+bin/
+
+# Ignore compiled executables (you can comment this out if you want to push your .exe)
+*.exe
+
+# Do NOT ignore your OpenGL dependencies (.dll, .lib, .a, .so)
+!*.dll
+!*.lib
+!*.a
+!*.so
+
+# Explicitly ensure include and x64 root folders are NOT ignored
+!include/
+!x64/
+
+# CMake (if you plan to use it)
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
