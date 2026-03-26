@@ -8,7 +8,6 @@
 *.sln.docstates
 
 # Intermediate build files and logs
-*.obj
 *.o
 *.pch
 *.pdb

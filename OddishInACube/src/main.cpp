@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 	}
 
 	char* obj = argv[1];
-
+	//obj = "Assets/" + obj;
 	bool success = mesh.LoadFromFileObj(obj);
 
 	//Building all the datas to put into our buffers, I know this is inefficient.
@@ -140,9 +140,9 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
 	glEnableVertexAttribArray(1);
 
-	prog.BuildFiles("shader.vert", "shader.frag");
-	planeProg.BuildFiles("planeShader.vert", "planeShader.frag");
-	shadowProg.BuildFiles("shadow.vert", "shadow.frag");
+	prog.BuildFiles("Shaders/shader.vert", "Shaders/shader.frag");
+	planeProg.BuildFiles("Shaders/planeShader.vert", "Shaders/planeShader.frag");
+	shadowProg.BuildFiles("Shaders/shadow.vert", "Shaders/shadow.frag");
 
 	glClearColor(0, 0, 0, 1.0);
 	glViewport(0, 0, screenWidth, screenHeight);

@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="OddishInACube/OddishInACube.vcxproj" />
+  <Project Path="OddishInACube/OddishInACube.vcxproj" Id="fdc80074-6c22-4f9e-87e1-30bfc68902bf" />
 </Solution>
