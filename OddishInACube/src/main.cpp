@@ -160,7 +160,7 @@ void myDisplay()
 	cy::Matrix3f yRotMatrix = cy::Matrix3f::RotationY(yRot);
 	cy::Matrix3f xRotMatrix = cy::Matrix3f::RotationX(xRot);
 
-	cy::Matrix4f fullRotaion = cy::Matrix4f(yRotMatrix * xRotMatrix);
+	cy::Matrix4f fullRotaion = cy::Matrix4f::Scale(10.0f) * cy::Matrix4f::RotationX(cy::Deg2Rad(90.0f)) * cy::Matrix4f(yRotMatrix * xRotMatrix);
 	cy::Matrix4f cameraRot = cy::Matrix4f::RotationY(cameraYRot) * cy::Matrix4f::RotationX(cameraXRot);
 	cy::Matrix4f translationMatrix = cy::Matrix4f::Translation(cy::Vec3f(0.0, 0.0, -distance));
 	cy::Matrix4f projMatrix = cy::Matrix4f::Perspective(cy::Deg2Rad(40.0), float(screenWidth) / float(screenHeight),
