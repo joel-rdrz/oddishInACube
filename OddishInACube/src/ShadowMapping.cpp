@@ -11,7 +11,7 @@ void ShadowMapping::Initialize()
 	shadowProg.BuildFiles("Shaders/shadow.vert", "Shaders/shadow.frag");
 }
 
-void ShadowMapping::RenderShadowPass(cy::Matrix4f fullRotaion, GLuint vao, unsigned int meshNF) 
+void ShadowMapping::RenderShadowPass(cy::Matrix4f fullRotaion, GLuint vao, cy::TriMesh mesh) 
 {
 	lightView = cy::Matrix4f::View(cy::Vec3f(64.0, 42.0, 64.0), cy::Vec3f(0.0, 0.0, 0.0), cy::Vec3f(0.0, 1.0, 0.0));
 	lightProjMatrix = cy::Matrix4f::Perspective(cy::Deg2Rad(30.0), float(shadowWidth) / float(shadowHeight),
@@ -31,7 +31,7 @@ void ShadowMapping::RenderShadowPass(cy::Matrix4f fullRotaion, GLuint vao, unsig
 	shadowProg["mvp"] = mlp;
 
 	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, meshNF * 3);
+	glDrawArrays(GL_TRIANGLES, 0, mesh.NF() * 3);
 	shadowMap.Unbind();
 
 	shadowMap.BindTexture(1);

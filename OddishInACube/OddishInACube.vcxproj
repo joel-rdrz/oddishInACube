@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\LightingHandler.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ShadowMapping.cpp" />
   </ItemGroup>

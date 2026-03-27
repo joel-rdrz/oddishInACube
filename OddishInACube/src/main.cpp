@@ -4,7 +4,7 @@
 #include <cyMatrix.h>
 #include <cyGL.h>
 #include <ShadowMapping.h>
-
+#include <LightingHandler.h>
 
 void myDisplay();
 void myKeyboard(unsigned char key, int x, int y);
@@ -17,7 +17,6 @@ cy::TriMesh mesh;
 std::vector<cy::Vec3f> vertexBufferData;
 std::vector<cy::Vec3f> normalBufferData;
 GLuint vao;
-cy::GLSLProgram prog;
 float xRot = -89.5;
 float yRot = 10;
 float distance = 100.0;
@@ -36,13 +35,13 @@ int screenHeight = 600;
 float cameraXRot = 0.24;
 float cameraYRot = 0.0;
 float planeDistance = 5.0;
-cy::GLSLProgram planeProg;
 GLuint planeVao;
 GLuint planeVbo;
 
 boolean altPressed = false;
 
 ShadowMapping shadowObj;
+LightingHandler lightObj;
 
 cy::GLRenderTexture2D renderBuffer;
 
@@ -131,8 +130,7 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
 	glEnableVertexAttribArray(1);
 
-	prog.BuildFiles("Shaders/shader.vert", "Shaders/shader.frag");
-	planeProg.BuildFiles("Shaders/planeShader.vert", "Shaders/planeShader.frag");
+	lightObj.Initialize();
 
 	glClearColor(0, 0, 0, 1.0);
 	glViewport(0, 0, screenWidth, screenHeight);
@@ -174,52 +172,13 @@ void myDisplay()
 	cy::Matrix3f normalMatrix = mv.GetSubMatrix3();
 	normalMatrix.Invert();
 	normalMatrix.Transpose();
-
-	prog.Bind();
-
-	//Lighting matrices
-
 	
-	shadowObj.RenderShadowPass(fullRotaion, vao, mesh.NF());
+	shadowObj.RenderShadowPass(fullRotaion, vao, mesh);
 
-	prog.Bind();
-	prog["shadow"] = 1;
-	prog["mvp"] = mvp;
-	prog["normalMatrix"] = normalMatrix;
-	prog["mv"] = mv;
-	prog["matrixShadow"] = shadowObj.matrixShadow;
-	cy::Vec4f lightPosWorld(64.0f, 42.0f, 64.0f, 1.0f);
-	cy::Vec4f lightPosCamera = translationMatrix * cameraRot * lightPosWorld; 
-	prog["lightPos"] = cy::Vec3f(lightPosCamera); 
-
-
-	glViewport(0, 0, screenWidth, screenHeight);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	prog.Bind();
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, mesh.NF() * 3);
-
-	cy::Matrix4f planeFull = cy::Matrix4f::Translation(cy::Vec3f(0.0f, -3.0f, 0.0f)) * cy::Matrix4f::RotationX(cy::Deg2Rad(-90.0f)) * cy::Matrix4f::Scale(75.0f);
-	cy::Matrix4f planeMVP = projMatrix * translationMatrix * cameraRot * planeFull;
-	cy::Matrix4f planeMV =  translationMatrix * cameraRot * planeFull;
-	cy::Matrix4f planeMLP = shadowObj.lightProjMatrix * shadowObj.lightView * planeFull;
-	cy::Matrix3f planeNormalMatrix = planeMV.GetSubMatrix3();
-	cy::Matrix4f matrixShadowPlane = shadowObj.T * shadowObj.S * planeMLP;
-
-	planeNormalMatrix.Invert();
-	planeNormalMatrix.Transpose();
-
-	planeProg.Bind();
-	planeProg["planeMVP"] = planeMVP;
-	planeProg["mv"] = planeMV;
-	planeProg["normalMatrix"] = planeNormalMatrix;
-	planeProg["lightPos"] = cy::Vec3f(lightPosCamera);
-	planeProg["matrixShadow"] = matrixShadowPlane;
-	planeProg["shadow"] = 1;
-
-	glBindVertexArray(planeVao); 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	lightObj.RenderLightingPass(mvp, normalMatrix, mv, shadowObj.matrixShadow, 
+		translationMatrix, cameraRot, screenWidth, screenHeight,
+		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
+		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
 
 	glutSwapBuffers();
 }

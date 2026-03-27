@@ -1,6 +1,7 @@
 #ifndef SHADOWMAPPING_H
 #define SHADOWMAPPING_H
 #include <GL/glew.h>
+#include <cyTriMesh.h>
 #include <cyMatrix.h>
 #include <cyGL.h>
 
@@ -21,6 +22,6 @@ public:
 
 	void Initialize();
 
-	void RenderShadowPass(cy::Matrix4f fullRotaion, GLuint vao, unsigned int meshNF);
+	void RenderShadowPass(cy::Matrix4f fullRotaion, GLuint vao, cy::TriMesh mesh);
 };
 #endif
