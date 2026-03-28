@@ -14,6 +14,7 @@ void LightingHandler::RenderLightingPass(
 )
 {
 	prog.Bind();
+	glActiveTexture(GL_TEXTURE1);
 	prog["shadow"] = 1;
 	prog["mvp"] = mvp;
 	prog["normalMatrix"] = normalMatrix;
@@ -22,6 +23,9 @@ void LightingHandler::RenderLightingPass(
 	cy::Vec4f lightPosWorld(64.0f, 42.0f, 64.0f, 1.0f);
 	cy::Vec4f lightPosCamera = translationMatrix * cameraRot * lightPosWorld;
 	prog["lightPos"] = cy::Vec3f(lightPosCamera);
+	glActiveTexture(GL_TEXTURE0);
+	tex.Bind(0);
+	prog["tex"] = 0;
 
 
 	glViewport(0, 0, screenWidth, screenHeight);

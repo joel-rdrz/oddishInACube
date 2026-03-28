@@ -5,6 +5,7 @@
 #include <cyGL.h>
 #include <ShadowMapping.h>
 #include <LightingHandler.h>
+#include "lodepng.h"
 
 void myDisplay();
 void myKeyboard(unsigned char key, int x, int y);
@@ -16,6 +17,7 @@ void myReshape(int x, int y);
 cy::TriMesh mesh;
 std::vector<cy::Vec3f> vertexBufferData;
 std::vector<cy::Vec3f> normalBufferData;
+std::vector<cy::Vec3f> textureBufferData;
 GLuint vao;
 float xRot = -89.5;
 float yRot = 10;
@@ -28,6 +30,8 @@ unsigned int width;
 unsigned int height;
 std::vector<unsigned char> imageData;
 cyGLTexture2D tex;
+char* textureFile;
+
 
 int screenWidth = 800;
 int screenHeight = 600;
@@ -37,6 +41,7 @@ float cameraYRot = 0.0;
 float planeDistance = 5.0;
 GLuint planeVao;
 GLuint planeVbo;
+GLuint texBuffer;
 
 boolean altPressed = false;
 
@@ -99,6 +104,15 @@ int main(int argc, char** argv)
 		normalBufferData.push_back(mesh.VN(face.v[2]));
 	}
 
+	// Loop for texture coordinates
+	for (unsigned int i = 0; i < mesh.NF(); i++) {
+		cy::TriMesh::TriFace textureFace = mesh.FT(i);
+
+		textureBufferData.push_back(mesh.VT(textureFace.v[0]));
+		textureBufferData.push_back(mesh.VT(textureFace.v[1]));		
+		textureBufferData.push_back(mesh.VT(textureFace.v[2]));
+	}
+
 	shadowObj.Initialize();
 
 	//Just da coordinated for the plane
@@ -132,6 +146,29 @@ int main(int argc, char** argv)
 
 	lightObj.Initialize();
 
+	if (mesh.NM() > 0) {
+		textureFile = mesh.M(0).map_Kd.data; // Gets the diffuse texture
+	}
+
+	if (textureFile) {
+		unsigned error = lodepng::decode(imageData, width, height, textureFile);
+		if (!error) {
+			lightObj.tex.Initialize();
+			lightObj.tex.SetImage(imageData.data(), 4, width, height);
+			lightObj.tex.BuildMipmaps();
+		}
+		else {
+			std::cout << "Error loading texture" << std::endl;
+		}
+	}
+
+	glBindVertexArray(vao);
+	glGenBuffers(1, &texBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, texBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cy::Vec3f) * textureBufferData.size(), textureBufferData.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT,GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
+	glEnableVertexAttribArray(2);
+
 	glClearColor(0, 0, 0, 1.0);
 	glViewport(0, 0, screenWidth, screenHeight);
 
@@ -160,7 +197,9 @@ void myDisplay()
 	cy::Matrix3f yRotMatrix = cy::Matrix3f::RotationY(yRot);
 	cy::Matrix3f xRotMatrix = cy::Matrix3f::RotationX(xRot);
 
-	cy::Matrix4f fullRotaion = cy::Matrix4f(yRotMatrix * xRotMatrix);
+	cy::Matrix4f angleRotation = cy::Matrix4f::RotationX(cy::Deg2Rad(80.0f)) * cy::Matrix4f::RotationY(cy::Deg2Rad(180.0f));
+
+	cy::Matrix4f fullRotaion = cy::Matrix4f::Scale(20.0f) * cy::Matrix4f(yRotMatrix * xRotMatrix) * angleRotation;
 	cy::Matrix4f cameraRot = cy::Matrix4f::RotationY(cameraYRot) * cy::Matrix4f::RotationX(cameraXRot);
 	cy::Matrix4f translationMatrix = cy::Matrix4f::Translation(cy::Vec3f(0.0, 0.0, -distance));
 	cy::Matrix4f projMatrix = cy::Matrix4f::Perspective(cy::Deg2Rad(40.0), float(screenWidth) / float(screenHeight),
