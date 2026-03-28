@@ -9,6 +9,7 @@ class LightingHandler {
 public:
 	cy::GLSLProgram prog;
 	cy::GLSLProgram planeProg;
+	cyGLTexture2D tex;
 
 	void Initialize();
 
