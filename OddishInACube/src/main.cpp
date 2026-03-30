@@ -5,6 +5,7 @@
 #include <cyGL.h>
 #include <ShadowMapping.h>
 #include <LightingHandler.h>
+#include <GlassCube.h>
 #include "lodepng.h"
 
 void myDisplay();
@@ -47,6 +48,8 @@ boolean altPressed = false;
 
 ShadowMapping shadowObj;
 LightingHandler lightObj;
+
+GlassCube glassCube;
 
 cy::GLRenderTexture2D renderBuffer;
 
@@ -145,6 +148,7 @@ int main(int argc, char** argv)
 	glEnableVertexAttribArray(1);
 
 	lightObj.Initialize();
+	glassCube.Initialize();
 
 	if (mesh.NM() > 0) {
 		textureFile = mesh.M(0).map_Kd.data; // Gets the diffuse texture
@@ -211,13 +215,17 @@ void myDisplay()
 	cy::Matrix3f normalMatrix = mv.GetSubMatrix3();
 	normalMatrix.Invert();
 	normalMatrix.Transpose();
-	
+
+	glassCube.SetModel();
+
 	shadowObj.RenderShadowPass(fullRotaion, vao, mesh);
 
 	lightObj.RenderLightingPass(mvp, normalMatrix, mv, shadowObj.matrixShadow, 
 		translationMatrix, cameraRot, screenWidth, screenHeight,
 		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
 		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
+
+	glassCube.Render(projMatrix, translationMatrix, cameraRot);
 
 	glutSwapBuffers();
 }

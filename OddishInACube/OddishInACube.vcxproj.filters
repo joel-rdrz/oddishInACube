@@ -30,5 +30,26 @@
     <ClCompile Include="src\Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GlassCube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\lighting.frag" />
+    <None Include="Shaders\lighting.vert" />
+    <None Include="Shaders\plane.frag" />
+    <None Include="Shaders\plane.vert" />
+    <None Include="Shaders\shadow.frag" />
+    <None Include="Shaders\shadow.vert" />
+    <None Include="Shaders\cube.frag" />
+    <None Include="Shaders\cube.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\GlassCube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ShadowMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

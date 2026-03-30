@@ -4,4 +4,8 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="OddishInACube/OddishInACube.vcxproj" Id="fdc80074-6c22-4f9e-87e1-30bfc68902bf" />
+  <Project Path="OddishInACube\OddishInACube.vcxproj" />
+  <Properties Name="Visual Studio">
+    <Property Name="OpenWith" Value="17" />
+  </Properties>
 </Solution>

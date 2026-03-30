@@ -105,12 +105,12 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\nandh\OneDrive\Desktop\Final Project\OddishInACube\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)lib/x64</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\nandh\OneDrive\Desktop\Final Project\OddishInACube\lib\x64\</AdditionalLibraryDirectories>
       <AdditionalDependencies>freeglut.lib;opengl32.lib;glew32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -123,18 +123,36 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\nandh\OneDrive\Desktop\Final Project\OddishInACube\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\nandh\OneDrive\Desktop\Final Project\OddishInACube\lib\x64\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;opengl32.lib;glew32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GlassCube.cpp" />
     <ClCompile Include="src\LightingHandler.cpp" />
     <ClCompile Include="src\lodepng.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ShadowMapping.cpp" />
     <ClCompile Include="src\Water.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\cube.frag" />
+    <None Include="Shaders\cube.vert" />
+    <None Include="Shaders\lighting.frag" />
+    <None Include="Shaders\lighting.vert" />
+    <None Include="Shaders\plane.frag" />
+    <None Include="Shaders\plane.vert" />
+    <None Include="Shaders\shadow.frag" />
+    <None Include="Shaders\shadow.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include\GlassCube.h" />
+    <ClInclude Include="Include\ShadowMapping.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
