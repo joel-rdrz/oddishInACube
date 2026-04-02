@@ -6,6 +6,7 @@
 #include <ShadowMapping.h>
 #include <LightingHandler.h>
 #include <GlassCube.h>
+#include <WaterHandler.h>
 #include "lodepng.h"
 
 void myDisplay();
@@ -40,14 +41,18 @@ int screenHeight = 600;
 float cameraXRot = 0.24;
 float cameraYRot = 0.0;
 float planeDistance = 5.0;
+float waterHeight = 25.0f;
 GLuint planeVao;
 GLuint planeVbo;
 GLuint texBuffer;
 
 boolean altPressed = false;
+GLuint maskVao;
+GLuint  maskVbo;
 
 ShadowMapping shadowObj;
 LightingHandler lightObj;
+WaterHandler waterObj;
 
 GlassCube glassCube;
 
@@ -147,8 +152,29 @@ int main(int argc, char** argv)
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
 	glEnableVertexAttribArray(1);
 
+	// THis is basically the outline of the cube. THink of it like a cookie cutter that is the shape of the cube,
+	// we will use this to stencil the water so that it only appears inside the cube, this is based on section 3.5.3 of the Water Rendering paper.
+	float maskPlane[] = {
+		-23.0f, waterHeight, -23.0f,
+		 23.0f, waterHeight, -23.0f,
+		 23.0f, waterHeight,  23.0f,
+
+		-23.0f, waterHeight, -23.0f,
+		 23.0f, waterHeight,  23.0f,
+		-23.0f, waterHeight,  23.0f
+	};
+
+	glGenVertexArrays(1, &maskVao);
+	glBindVertexArray(maskVao);
+	glGenBuffers(1, &maskVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, maskVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(maskPlane), maskPlane, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
 	lightObj.Initialize();
 	glassCube.Initialize();
+	waterObj.Initialize(waterHeight);
 
 	if (mesh.NM() > 0) {
 		textureFile = mesh.M(0).map_Kd.data; // Gets the diffuse texture
@@ -216,6 +242,8 @@ void myDisplay()
 	normalMatrix.Invert();
 	normalMatrix.Transpose();
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
 	glassCube.SetModel();
 
 	shadowObj.RenderShadowPass(fullRotaion, vao, mesh);
@@ -225,6 +253,36 @@ void myDisplay()
 		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
 		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
 
+	// What this next part here does is it uses the stencil buffer to only draw the water where the water should be,
+	// this is done by first drawing a plane where the water should be and setting the stencil to 1 there, then we only draw the water where the stencil is 1,
+	// this allows us to have the water inside the glass cube without it rendering on top of the cube itself, this is based on section 3.5.3 of the Water Rendering paper.
+	// We are effecitvely taking our infinite water plane and forcing it to live IN our cube this is like the volcano example in the paper. I'm adding this note becuaset this
+	// was a bit confusing to implement and I want to make sure the logic is clear in the future when I look back at this code.
+
+	glEnable(GL_STENCIL_TEST);
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glDepthMask(GL_FALSE);
+
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	// Draw the "Outline of the Lake" Section 3.5.3 of Water Rendering paper on canvas, this will set the stencil to 1 where the water should be
+	waterObj.waterProg.Bind();
+	cy::Matrix4f maskMVP = projMatrix * translationMatrix * cameraRot;
+	waterObj.waterProg["mvp"] = maskMVP;
+	glBindVertexArray(maskVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glDepthMask(GL_TRUE);
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+	cy::Matrix4f waterMVP = projMatrix * translationMatrix * cameraRot;
+	waterObj.RenderWater(waterMVP);
+
+	glDisable(GL_STENCIL_TEST);
+
+	// Draw the glass cube at the end so it doesn't block the water inside it
 	glassCube.Render(projMatrix, translationMatrix, cameraRot);
 
 	glutSwapBuffers();

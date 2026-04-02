@@ -138,7 +138,7 @@
     <ClCompile Include="src\lodepng.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ShadowMapping.cpp" />
-    <ClCompile Include="src\Water.cpp" />
+    <ClCompile Include="src\WaterHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cube.frag" />

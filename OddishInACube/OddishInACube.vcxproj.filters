@@ -27,10 +27,10 @@
     <ClCompile Include="src\lodepng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Water.cpp">
+    <ClCompile Include="GlassCube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GlassCube.cpp">
+    <ClCompile Include="src\WaterHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
