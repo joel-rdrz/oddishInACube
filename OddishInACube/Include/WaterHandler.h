@@ -8,12 +8,15 @@
 class WaterHandler {
 public:
 	cy::GLSLProgram waterProg;
+	cy::GLSLProgram maskProg;
 	GLuint waterVao;
 	GLuint waterVbo;
 	unsigned int vertexCount;
 
 	void Initialize(float waterHeight);
 
-	void RenderWater(cy::Matrix4f mvp);
+	void RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight);
+
+	void RenderMask(cy::Matrix4f mvp, GLuint maskvao);
 };
 #endif

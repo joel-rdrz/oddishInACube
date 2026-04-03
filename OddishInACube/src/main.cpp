@@ -269,7 +269,7 @@ void myDisplay()
 	// Draw the "Outline of the Lake" Section 3.5.3 of Water Rendering paper on canvas, this will set the stencil to 1 where the water should be
 	waterObj.waterProg.Bind();
 	cy::Matrix4f maskMVP = projMatrix * translationMatrix * cameraRot;
-	waterObj.waterProg["mvp"] = maskMVP;
+	waterObj.RenderMask(maskMVP, maskVao);
 	glBindVertexArray(maskVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -279,8 +279,8 @@ void myDisplay()
 	
 	glDisable(GL_CULL_FACE);
 
-	cy::Matrix4f waterMVP = projMatrix * translationMatrix * cameraRot;
-	waterObj.RenderWater(waterMVP);
+	cy::Matrix4f viewMatrix = translationMatrix * cameraRot;
+	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight);
 
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_STENCIL_TEST);

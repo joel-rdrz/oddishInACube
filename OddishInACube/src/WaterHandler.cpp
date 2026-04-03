@@ -3,26 +3,30 @@
 void WaterHandler::Initialize(float waterHeight) {
 	std::vector<cy::Vec3f> waterVertices;
 
-	int gridSize = 64;
+	int gridSize = 128;
 	float size = 100.0f; 
 	float halfSize = size / 2.0f;
 
 	// This is making the "infinite plane" of water by creating a grid of triangles.
 	// The waterHeight is the y value of all the vertices, so it will be a flat plane.
 	// THis will be replaced when we do what the paper actually suggests.
-	for (int z = 0; z < gridSize - 1; z++) {
+	for (int y = 0; y < gridSize - 1; y++) {
 		for (int x = 0; x < gridSize - 1; x++) {
-			float x0 = ((float)x / (gridSize - 1)) * size - halfSize;
-			float z0 = ((float)z / (gridSize - 1)) * size - halfSize;
-			float x1 = ((float)(x + 1) / (gridSize - 1)) * size - halfSize;
-			float z1 = ((float)(z + 1) / (gridSize - 1)) * size - halfSize;
 
-			waterVertices.push_back(cy::Vec3f(x0, waterHeight, z0));
-			waterVertices.push_back(cy::Vec3f(x0, waterHeight, z1));
-			waterVertices.push_back(cy::Vec3f(x1, waterHeight, z0));
-			waterVertices.push_back(cy::Vec3f(x1, waterHeight, z0));
-			waterVertices.push_back(cy::Vec3f(x0, waterHeight, z1));
-			waterVertices.push_back(cy::Vec3f(x1, waterHeight, z1));
+			float x0 = ((float)x / (gridSize - 1)) * 2.0f - 1.0f;
+			float y0 = ((float)y / (gridSize - 1)) * 2.0f - 1.0f;
+			float x1 = ((float)(x + 1) / (gridSize - 1)) * 2.0f - 1.0f;
+			float y1 = ((float)(y + 1) / (gridSize - 1)) * 2.0f - 1.0f;
+
+			// Notice the Z coordinate is 0.0f! 
+			// This grid is flat against the camera lens, not in the 3D world.
+			waterVertices.push_back(cy::Vec3f(x0, y0, 0.0f));
+			waterVertices.push_back(cy::Vec3f(x0, y1, 0.0f));
+			waterVertices.push_back(cy::Vec3f(x1, y0, 0.0f));
+
+			waterVertices.push_back(cy::Vec3f(x1, y0, 0.0f));
+			waterVertices.push_back(cy::Vec3f(x0, y1, 0.0f));
+			waterVertices.push_back(cy::Vec3f(x1, y1, 0.0f));
 		}
 	}
 
@@ -37,12 +41,29 @@ void WaterHandler::Initialize(float waterHeight) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	waterProg.BuildFiles("Shaders/water.vert", "Shaders/water.frag");
+	maskProg.BuildFiles("Shaders/mask.vert", "Shaders/mask.frag");
+
 }
 
-void WaterHandler::RenderWater(cy::Matrix4f mvp) {
+void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight) {
+	cy::Matrix4f viewProjMatrix = projMatrix * viewMatrix;
+
+	cy::Matrix4f projectorMatrix = viewProjMatrix;
+	projectorMatrix.Invert();
+
 	waterProg.Bind();
-	waterProg["mvp"] = mvp;
+	waterProg["mvp"] = viewProjMatrix;
+	waterProg["projectorMatrix"] = projectorMatrix;
+	waterProg["waterHeight"] = worldWaterHeight;
 
 	glBindVertexArray(waterVao);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+}
+
+void WaterHandler::RenderMask(cy::Matrix4f mvp, GLuint maskVao) {
+	maskProg.Bind();
+	maskProg["mvp"] = mvp;
+
+	glBindVertexArray(maskVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
