@@ -276,10 +276,13 @@ void myDisplay()
 	glDepthMask(GL_TRUE);
 	glStencilFunc(GL_EQUAL, 1, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	
+	glDisable(GL_CULL_FACE);
 
 	cy::Matrix4f waterMVP = projMatrix * translationMatrix * cameraRot;
 	waterObj.RenderWater(waterMVP);
 
+	glEnable(GL_CULL_FACE);
 	glDisable(GL_STENCIL_TEST);
 
 	// Draw the glass cube at the end so it doesn't block the water inside it

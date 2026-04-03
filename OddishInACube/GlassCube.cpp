@@ -60,6 +60,10 @@ void GlassCube::Render(cy::Matrix4f projMatrix, cy::Matrix4f translationMatrix, 
 	glassProg["mvp"] = cubeMVP;
 	glassProg["mv"] = cubeMV;
 	glassProg["normalMatrix"] = cubeNormal;
+	glassProg["model"] = cubeModel;
+	glassProg["waterHeight"] = 25.0f;
+
+
 
 	// Enable settings for blending and alpha values for transparency
 	glEnable(GL_BLEND);
