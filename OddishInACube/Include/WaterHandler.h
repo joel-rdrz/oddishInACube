@@ -15,7 +15,7 @@ public:
 
 	void Initialize(float waterHeight);
 
-	void RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight);
+	void RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time);
 
 	void RenderMask(cy::Matrix4f mvp, GLuint maskvao);
 };

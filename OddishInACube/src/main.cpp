@@ -10,6 +10,7 @@
 #include "lodepng.h"
 
 void myDisplay();
+void myIdle();
 void myKeyboard(unsigned char key, int x, int y);
 void myMouse(int button, int state, int x, int y);
 void myMouseMotion(int x, int y);
@@ -70,6 +71,7 @@ int main(int argc, char** argv)
 	glutDisplayFunc(myDisplay);
 	glutKeyboardFunc(myKeyboard);
 	glutReshapeFunc(myReshape);
+	glutIdleFunc(myIdle);
 	glewInit();
 	glEnable(GL_DEPTH_TEST);
 	glGenVertexArrays(1, &vao);
@@ -224,6 +226,7 @@ void myKeyboard(unsigned char key, int x, int y)
 }
 void myDisplay()
 {
+	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
 	cy::Matrix3f yRotMatrix = cy::Matrix3f::RotationY(yRot);
 	cy::Matrix3f xRotMatrix = cy::Matrix3f::RotationX(xRot);
 
@@ -280,12 +283,11 @@ void myDisplay()
 	glDisable(GL_CULL_FACE);
 
 	cy::Matrix4f viewMatrix = translationMatrix * cameraRot;
-	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight);
+	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight, currentTime);
 
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_STENCIL_TEST);
 
-	// Draw the glass cube at the end so it doesn't block the water inside it
 	glassCube.Render(projMatrix, translationMatrix, cameraRot);
 
 	glutSwapBuffers();
@@ -344,6 +346,11 @@ void myReshape(int x, int y)
 	screenWidth = x;
 	screenHeight = y;
 	glViewport(0, 0, screenWidth, screenHeight);
+	glutPostRedisplay();
+}
+
+void myIdle()
+{
 	glutPostRedisplay();
 }
 
