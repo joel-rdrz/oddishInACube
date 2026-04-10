@@ -187,6 +187,7 @@ int main(int argc, char** argv)
 	lightObj.Initialize();
 	glassCube.Initialize();
 	waterObj.Initialize(waterHeight);
+	waterObj.initFrameBuffers(screenWidth, screenHeight);
 
 	if (mesh.NM() > 0) {
 		textureFile = mesh.M(0).map_Kd.data; // Gets the diffuse texture
@@ -301,7 +302,7 @@ void myDisplay()
 	cy::Matrix4f inverseView = viewMatrix;
 	inverseView.Invert();
 	cy::Vec3f myCameraPos = cy::Vec3f(inverseView * cy::Vec4f(0.0f, 0.0f, 0.0f, 1.0f));
-	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight, currentTime, cy::Vec3f(64.0, 42.0, 64.0), myCameraPos);
+	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight, currentTime, cy::Vec3f(64.0, 42.0, 64.0), myCameraPos, screenWidth, screenHeight);
 
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_STENCIL_TEST);
@@ -365,6 +366,7 @@ void myReshape(int x, int y)
 	screenWidth = x;
 	screenHeight = y;
 	glViewport(0, 0, screenWidth, screenHeight);
+	waterObj.initFrameBuffers(screenWidth, screenHeight);
 	glutPostRedisplay();
 }
 

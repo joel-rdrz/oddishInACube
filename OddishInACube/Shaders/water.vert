@@ -44,8 +44,6 @@ void main()
 	vec4 farWorldHomog = projectorMatrix * farClip;
 	// 2.3 in the docoumentation, we need to divide by w to get the world coordinates
 	vec3 farWorld = farWorldHomog.xyz / farWorldHomog.w; 
-
-	// 3. Create ray and solve for t
 	vec3 rayDir = normalize(farWorld - nearWorld);
 	float t = (waterHeight - nearWorld.y) / rayDir.y;
 
@@ -60,7 +58,7 @@ void main()
     worldPos.y += getWaveHeight(worldPos.x, worldPos.z);
 
 	// Nandhini this is finite differences!! 3200 coming in handy
-	float deltaT = 0.05; // Small time step for numerical differentiation
+	float deltaT = 0.05; 
 	float heightLeft = getWaveHeight(worldPos.x - deltaT, worldPos.z);
 	float heightRight = getWaveHeight(worldPos.x + deltaT, worldPos.z);
 	float heightDown = getWaveHeight(worldPos.x, worldPos.z - deltaT);

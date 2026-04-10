@@ -45,7 +45,7 @@ void WaterHandler::Initialize(float waterHeight) {
 
 }
 
-void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time, cy::Vec3f lightDir, cy::Vec3f cameraPos) {
+void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time, cy::Vec3f lightDir, cy::Vec3f cameraPos, float screenWidth, float screenHeight) {
 	cy::Matrix4f viewProjMatrix = projMatrix * viewMatrix;
 
 	cy::Matrix4f projectorMatrix = viewProjMatrix;
@@ -58,6 +58,10 @@ void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix,
 	waterProg["time"] = time;
 	waterProg["lightDir"] = lightDir;
 	waterProg["cameraPos"] = cameraPos;
+	waterProg["screenWidth"] = screenWidth;
+	waterProg["screenHeight"] = screenHeight;
+	waterProg["reflectionTex"] = 1;
+	waterProg["refractionTex"] = 2;
 
 	glActiveTexture(GL_TEXTURE0);
 	noiseTex.Bind(0);
@@ -73,4 +77,9 @@ void WaterHandler::RenderMask(cy::Matrix4f mvp, GLuint maskVao) {
 
 	glBindVertexArray(maskVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void WaterHandler::initFrameBuffers(int width, int height) {
+	reflectionFBO.Initialize(true, 3, width, height);
+	refractionFBO.Initialize(true, 3, width, height);
 }
