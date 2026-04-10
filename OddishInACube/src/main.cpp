@@ -21,6 +21,7 @@ cy::TriMesh mesh;
 std::vector<cy::Vec3f> vertexBufferData;
 std::vector<cy::Vec3f> normalBufferData;
 std::vector<cy::Vec3f> textureBufferData;
+std::vector<unsigned char> noiseData;
 GLuint vao;
 float xRot = -89.5;
 float yRot = 10;
@@ -135,6 +136,15 @@ int main(int argc, char** argv)
 		1.0, 1.0, 0.0,    0.0, 0.0,1.0,
 		-1.0, 1.0, 0.0,   0.0, 0.0, 1.0
 	};
+
+	unsigned int noiseHeight;
+	unsigned int noiseWidth;
+
+	lodepng::decode(noiseData, noiseWidth, noiseHeight, "Assets/Noise.png");
+	waterObj.noiseTex.Initialize();
+	waterObj.noiseTex.SetImage(noiseData.data(), 4, noiseWidth, noiseHeight);
+	waterObj.noiseTex.BuildMipmaps();
+	waterObj.noiseTex.SetWrappingMode(GL_REPEAT, GL_REPEAT);
 	//Actually binds our buffers and all that.
 	glBindBuffer(GL_ARRAY_BUFFER, planeVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(squarePlane), squarePlane, GL_STATIC_DRAW);
@@ -226,7 +236,7 @@ void myKeyboard(unsigned char key, int x, int y)
 }
 void myDisplay()
 {
-	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0;
+	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 500.0;
 	cy::Matrix3f yRotMatrix = cy::Matrix3f::RotationY(yRot);
 	cy::Matrix3f xRotMatrix = cy::Matrix3f::RotationX(xRot);
 
@@ -283,10 +293,19 @@ void myDisplay()
 	glDisable(GL_CULL_FACE);
 
 	cy::Matrix4f viewMatrix = translationMatrix * cameraRot;
-	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight, currentTime);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// It would be best to make it so it gets the lightDir from the lightHandler, but for sake of project seperation
+	// I just hard coded it in here, this is the direction of the light that we will use for the water shader, it is in world space.
+	cy::Matrix4f inverseView = viewMatrix;
+	inverseView.Invert();
+	cy::Vec3f myCameraPos = cy::Vec3f(inverseView * cy::Vec4f(0.0f, 0.0f, 0.0f, 1.0f));
+	waterObj.RenderWater(projMatrix,viewMatrix, waterHeight, currentTime, cy::Vec3f(64.0, 42.0, 64.0), myCameraPos);
 
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_STENCIL_TEST);
+	glDisable(GL_BLEND);
 
 	glassCube.Render(projMatrix, translationMatrix, cameraRot);
 

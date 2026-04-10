@@ -10,12 +10,26 @@ uniform float time;
 out vec3 fragNormal;
 out vec3 fragWorldPos;
 
+uniform sampler2D noiseTex;
+uniform float scale;
+
 // nandhini if u read this later cause u need to do some shadow stuff this is a lot like our ray tracing assign 
 // from 4600
 float getWaveHeight(float x, float z) {
-	float waveHeight = sin(x * 0.5 + time) * 0.5;
-	waveHeight += cos(z * 0.4 + time * 1.2) * 0.5;
-	return waveHeight;
+	vec2 worldXZ = vec2(x,z);
+
+	//This is how the paper does the wave height (pg 38), it uses a noise texture and samples it at different
+	// frequencies and amplitudes to create a more realistic wave pattern The paper doesn't use time instead
+	// it makes a 3d perlin noise function every frame. That is a whole other project that the paper mostly brushes
+	// over, but I think using a noise texture is a good enough approximation for our purposes, and it is much easier to implement
+
+	vec2 tc0 = (scale * worldXZ * 0.015625) + (time * 0.02);
+	vec2 tc1 = (scale * worldXZ * 0.25) + (time * 0.05);
+
+	float h = texture(noiseTex, tc0).r + texture(noiseTex, tc1).r - 0.5;
+
+	return h;
+
 }
 void main() 
 {
@@ -46,7 +60,7 @@ void main()
     worldPos.y += getWaveHeight(worldPos.x, worldPos.z);
 
 	// Nandhini this is finite differences!! 3200 coming in handy
-	float deltaT = 0.1; // Small time step for numerical differentiation
+	float deltaT = 0.05; // Small time step for numerical differentiation
 	float heightLeft = getWaveHeight(worldPos.x - deltaT, worldPos.z);
 	float heightRight = getWaveHeight(worldPos.x + deltaT, worldPos.z);
 	float heightDown = getWaveHeight(worldPos.x, worldPos.z - deltaT);

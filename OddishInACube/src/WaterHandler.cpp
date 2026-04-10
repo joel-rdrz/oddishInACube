@@ -45,7 +45,7 @@ void WaterHandler::Initialize(float waterHeight) {
 
 }
 
-void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time) {
+void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time, cy::Vec3f lightDir, cy::Vec3f cameraPos) {
 	cy::Matrix4f viewProjMatrix = projMatrix * viewMatrix;
 
 	cy::Matrix4f projectorMatrix = viewProjMatrix;
@@ -56,7 +56,13 @@ void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix,
 	waterProg["projectorMatrix"] = projectorMatrix;
 	waterProg["waterHeight"] = worldWaterHeight;
 	waterProg["time"] = time;
+	waterProg["lightDir"] = lightDir;
+	waterProg["cameraPos"] = cameraPos;
 
+	glActiveTexture(GL_TEXTURE0);
+	noiseTex.Bind(0);
+	waterProg["noiseTex"] = 0;
+	waterProg["scale"] = 0.3f;
 	glBindVertexArray(waterVao);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }
