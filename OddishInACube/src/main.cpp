@@ -139,7 +139,6 @@ int main(int argc, char** argv)
 
 	unsigned int noiseHeight;
 	unsigned int noiseWidth;
-
 	lodepng::decode(noiseData, noiseWidth, noiseHeight, "Assets/Noise.png");
 	waterObj.noiseTex.Initialize();
 	waterObj.noiseTex.SetImage(noiseData.data(), 4, noiseWidth, noiseHeight);
@@ -261,8 +260,46 @@ void myDisplay()
 	glassCube.SetModel();
 
 	shadowObj.RenderShadowPass(fullRotaion, vao, mesh);
+	// Basically we need to fill the refraction and reflection buffers before we can render the actual scene, this is '
+	// because we need those buffers to be filled in order to render the water correctly, so we render the scene twice 
+	// from the perspective of the water plane, once for the refraction buffer and once for the reflection buffer, 
+	// then we use those buffers to render the water correctly with refraction and reflection. ugh this water has harder than i anticipated...
+	waterObj.refractionFBO.Bind();
+	glClearColor(0, 0, 0, 1.0);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	lightObj.RenderLightingPass(mvp, normalMatrix, mv, shadowObj.matrixShadow, 
+		translationMatrix, cameraRot, screenWidth, screenHeight,
+		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
+		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
+
+	waterObj.refractionFBO.Unbind();
+	waterObj.refractionFBO.BuildTextureMipmaps();
+
+	waterObj.reflectionFBO.Bind();
+	glClearColor(0.6, 0.75, 0.9, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	cy::Matrix4f mirror = cy::Matrix4f::Translation(cy::Vec3f(0.0, waterHeight, 0.0)) * cy::Matrix4f::Scale(1.0f, -1.0f, 1.0f) * cy::Matrix4f::Translation(cy::Vec3f(0.0, -waterHeight, 0.0));
+	cy::Matrix4f reflectionModel = mirror * fullRotaion;
+	cy::Matrix4f reflectionMV = translationMatrix * cameraRot * reflectionModel;
+	cy::Matrix4f reflectionMVP = projMatrix * reflectionMV;
+	cy::Matrix3f reflectNormal = reflectionMV.GetSubMatrix3();
+	reflectNormal.Invert();
+	reflectNormal.Transpose();
+
+	glCullFace(GL_FRONT);
+	lightObj.RenderLightingPass(reflectionMVP, reflectNormal, reflectionMV, shadowObj.matrixShadow,
+		translationMatrix, cameraRot, screenWidth, screenHeight,
+		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
+		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
+	glCullFace(GL_BACK);
+	waterObj.reflectionFBO.Unbind();
+	waterObj.reflectionFBO.BuildTextureMipmaps();
+
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	lightObj.RenderLightingPass(mvp, normalMatrix, mv, shadowObj.matrixShadow,
 		translationMatrix, cameraRot, screenWidth, screenHeight,
 		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
 		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);

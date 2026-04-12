@@ -46,14 +46,18 @@ void WaterHandler::Initialize(float waterHeight) {
 }
 
 void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix, float worldWaterHeight, float time, cy::Vec3f lightDir, cy::Vec3f cameraPos, float screenWidth, float screenHeight) {
+	
+	reflectionFBO.BindTexture(1);
+	refractionFBO.BindTexture(2);
+
 	cy::Matrix4f viewProjMatrix = projMatrix * viewMatrix;
 
-	cy::Matrix4f projectorMatrix = viewProjMatrix;
-	projectorMatrix.Invert();
+	cy::Matrix4f projector = viewProjMatrix;
+	projector.Invert();
 
 	waterProg.Bind();
 	waterProg["mvp"] = viewProjMatrix;
-	waterProg["projectorMatrix"] = projectorMatrix;
+	waterProg["projector"] = projector;
 	waterProg["waterHeight"] = worldWaterHeight;
 	waterProg["time"] = time;
 	waterProg["lightDir"] = lightDir;

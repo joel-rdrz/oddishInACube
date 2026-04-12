@@ -3,7 +3,7 @@
 layout(location=0) in vec3 pos;
 
 uniform mat4 mvp;
-uniform mat4 projectorMatrix;
+uniform mat4 projector;
 uniform float waterHeight;
 uniform float time;
 
@@ -35,13 +35,13 @@ void main()
 {
 	// FIrst transformation z = -1.0
 	vec4 nearClip = vec4(pos.x, pos.y, -1.0, 1.0);
-	vec4 nearWorldHomog = projectorMatrix * nearClip;
+	vec4 nearWorldHomog = projector * nearClip;
 	// 2.3 in the docoumentation, we need to divide by w to get the world coordinates
 	vec3 nearWorld = nearWorldHomog.xyz / nearWorldHomog.w; 
 
 	// Second transformation z = 1.0
 	vec4 farClip = vec4(pos.x, pos.y, 1.0, 1.0);
-	vec4 farWorldHomog = projectorMatrix * farClip;
+	vec4 farWorldHomog = projector * farClip;
 	// 2.3 in the docoumentation, we need to divide by w to get the world coordinates
 	vec3 farWorld = farWorldHomog.xyz / farWorldHomog.w; 
 	vec3 rayDir = normalize(farWorld - nearWorld);
