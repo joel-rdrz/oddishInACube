@@ -20,7 +20,7 @@ void main(){
 
 	if(worldY < waterHeight) 
 	{
-		vec3 waterColor = vec3(0.1, 0.1, 0.1);
+		vec3 waterColor = vec3(0.1, 0.4, 0.7);
 		glassColor = mix(glassColor, waterColor, 0.85);
 		alpha = mix(0.4, 0.8, glassEdge);
 

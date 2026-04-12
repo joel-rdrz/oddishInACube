@@ -16,6 +16,13 @@ void myMouse(int button, int state, int x, int y);
 void myMouseMotion(int x, int y);
 void myReshape(int x, int y);
 
+//Environment mapping vars
+GLuint bgVao;
+GLuint bgVbo;
+cy::GLSLProgram bgProg;
+std::vector<cy::Vec3f> cubeVertexBuffer;
+cy::TriMesh cube;
+cy::GLTextureCubeMap envmap;
 
 cy::TriMesh mesh;
 std::vector<cy::Vec3f> vertexBufferData;
@@ -79,6 +86,8 @@ int main(int argc, char** argv)
 	glBindVertexArray(vao);
 	glGenVertexArrays(1, &planeVao);
 	glBindVertexArray(planeVao);
+	glGenVertexArrays(1, &bgVao);
+
 
 	GLuint buffer;
 	GLuint normalBufferGl;
@@ -86,6 +95,7 @@ int main(int argc, char** argv)
 	glGenBuffers(1, &buffer);
 	glGenBuffers(1, &normalBufferGl);
 	glGenBuffers(1, &planeVbo);
+	glGenBuffers(1, &bgVbo);
 
 
 	if (argc < 2)
@@ -97,6 +107,7 @@ int main(int argc, char** argv)
 	char* obj = argv[1];
 	//obj = "Assets/" + obj;
 	bool success = mesh.LoadFromFileObj(obj);
+	cube.LoadFromFileObj("Assets/cube.obj");
 
 	//Building all the datas to put into our buffers, I know this is inefficient.
 	for (unsigned int i = 0; i < mesh.NF(); i++) {
@@ -114,6 +125,13 @@ int main(int argc, char** argv)
 		normalBufferData.push_back(mesh.VN(face.v[1]));
 		normalBufferData.push_back(mesh.VN(face.v[2]));
 	}
+	for (unsigned int i = 0; i < cube.NF(); i++) {
+		cy::TriMesh::TriFace face = cube.F(i);
+
+		cubeVertexBuffer.push_back(cube.V(face.v[0]));
+		cubeVertexBuffer.push_back(cube.V(face.v[1]));
+		cubeVertexBuffer.push_back(cube.V(face.v[2]));
+	}
 
 	// Loop for texture coordinates
 	for (unsigned int i = 0; i < mesh.NF(); i++) {
@@ -123,7 +141,25 @@ int main(int argc, char** argv)
 		textureBufferData.push_back(mesh.VT(textureFace.v[1]));		
 		textureBufferData.push_back(mesh.VT(textureFace.v[2]));
 	}
+	//Environment mapping stuff
+	std::vector<std::string> cubeMapFileNames = {
+		"Assets/cubemap/cubemap_posx.png", "Assets/cubemap/cubemap_negx.png", "Assets/cubemap/cubemap_posy.png", 
+		"Assets/cubemap/cubemap_negy.png", "Assets/cubemap/cubemap_posz.png", "Assets/cubemap/cubemap_negz.png"
+	};
 
+	envmap.Initialize();
+	for (int i = 0; i < 6; ++i) {
+		//load image from file
+		std::vector<unsigned char> image_data;
+
+		lodepng::decode(image_data, width, height, cubeMapFileNames[i]);
+		//set image data
+		envmap.SetImageRGBA((cy::GLTextureCubeMap::Side)i, image_data.data(), width, height);
+	}
+
+	envmap.BuildMipmaps();
+	envmap.SetSeamless();
+	envmap.Bind(0);
 	shadowObj.Initialize();
 
 	//Just da coordinated for the plane
@@ -145,6 +181,14 @@ int main(int argc, char** argv)
 	waterObj.noiseTex.BuildMipmaps();
 	waterObj.noiseTex.SetWrappingMode(GL_REPEAT, GL_REPEAT);
 	//Actually binds our buffers and all that.
+
+	glBindVertexArray(bgVao);
+	glBindBuffer(GL_ARRAY_BUFFER, bgVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cy::Vec3f) * cubeVertexBuffer.size(), cubeVertexBuffer.data(), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(cy::Vec3f), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(planeVao);
 	glBindBuffer(GL_ARRAY_BUFFER, planeVbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(squarePlane), squarePlane, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (GLvoid*)0);
@@ -216,6 +260,7 @@ int main(int argc, char** argv)
 
 	glutMouseFunc(myMouse);
 	glutMotionFunc(myMouseMotion);
+	bgProg.BuildFiles("Shaders/bgShader.vert", "Shaders/bgShader.frag");
 
 	glutMainLoop();
 	return 0;
@@ -236,6 +281,8 @@ void myKeyboard(unsigned char key, int x, int y)
 }
 void myDisplay()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 500.0;
 	cy::Matrix3f yRotMatrix = cy::Matrix3f::RotationY(yRot);
 	cy::Matrix3f xRotMatrix = cy::Matrix3f::RotationX(xRot);
@@ -280,6 +327,19 @@ void myDisplay()
 	glClearColor(0.6, 0.75, 0.9, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	cy::Matrix4f mirror = cy::Matrix4f::Translation(cy::Vec3f(0.0, waterHeight, 0.0)) * cy::Matrix4f::Scale(1.0f, -1.0f, 1.0f) * cy::Matrix4f::Translation(cy::Vec3f(0.0, -waterHeight, 0.0));
+	
+	glDepthMask(GL_FALSE);
+	//Draw background...
+
+	bgProg.Bind();
+	bgProg["mvp"] = projMatrix * cameraRot * cy::Matrix4f::Scale(20.0f, -20.0f, 20.0f);
+	bgProg["env"] = 0;
+
+	glBindVertexArray(bgVao);
+	glDrawArrays(GL_TRIANGLES, 0, cube.NF() * 3);
+
+	glDepthMask(GL_TRUE);
+	
 	cy::Matrix4f reflectionModel = mirror * fullRotaion;
 	cy::Matrix4f reflectionMV = translationMatrix * cameraRot * reflectionModel;
 	cy::Matrix4f reflectionMVP = projMatrix * reflectionMV;
@@ -288,16 +348,28 @@ void myDisplay()
 	reflectNormal.Transpose();
 
 	glCullFace(GL_FRONT);
-	lightObj.RenderLightingPass(reflectionMVP, reflectNormal, reflectionMV, shadowObj.matrixShadow,
-		translationMatrix, cameraRot, screenWidth, screenHeight,
-		vao, mesh, projMatrix, shadowObj.lightProjMatrix,
-		shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
+	//lightObj.RenderLightingPass(reflectionMVP, reflectNormal, reflectionMV, shadowObj.matrixShadow,
+	//	translationMatrix, cameraRot, screenWidth, screenHeight,
+	//	vao, mesh, projMatrix, shadowObj.lightProjMatrix,
+	//	shadowObj.lightView, shadowObj.T, shadowObj.S, planeVao);
 	glCullFace(GL_BACK);
 	waterObj.reflectionFBO.Unbind();
 	waterObj.reflectionFBO.BuildTextureMipmaps();
 
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	glDepthMask(GL_FALSE);
+	//Draw background...
+
+	bgProg.Bind();
+	bgProg["mvp"] = projMatrix * cameraRot;
+	bgProg["env"] = 0;
+
+	glBindVertexArray(bgVao);
+	glDrawArrays(GL_TRIANGLES, 0, cube.NF() * 3);
+
+	glDepthMask(GL_TRUE);
 
 	lightObj.RenderLightingPass(mvp, normalMatrix, mv, shadowObj.matrixShadow,
 		translationMatrix, cameraRot, screenWidth, screenHeight,
@@ -411,4 +483,3 @@ void myIdle()
 {
 	glutPostRedisplay();
 }
-

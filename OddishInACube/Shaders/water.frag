@@ -32,7 +32,11 @@ void main()
 	vec2 distoredCoords = screenCoords - (n.xz * 0.05);
 	distoredCoords = clamp(distoredCoords, 0.001, 0.999);
 
-	vec3 waterColor = texture(refractionTex, distoredCoords).rgb;
+	vec3 rawRefraction = texture(refractionTex, distoredCoords).rgb;
+
+	vec3 niceWateryColor = vec3(0.1, 0.5, 0.8);
+
+	vec3 waterColor = mix(rawRefraction, niceWateryColor, 0.7);
 	vec3 skyColor = texture(reflectionTex, distoredCoords).rgb;
 
 	vec3 finalColor = mix(waterColor, skyColor, fresnal);
