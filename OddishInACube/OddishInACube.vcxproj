@@ -147,11 +147,14 @@
     <None Include="Shaders\lighting.vert" />
     <None Include="Shaders\plane.frag" />
     <None Include="Shaders\plane.vert" />
+    <None Include="Shaders\sat.frag" />
+    <None Include="Shaders\sat.vert" />
     <None Include="Shaders\shadow.frag" />
     <None Include="Shaders\shadow.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\GlassCube.h" />
+    <ClInclude Include="Include\LightingHandler.h" />
     <ClInclude Include="Include\ShadowMapping.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
