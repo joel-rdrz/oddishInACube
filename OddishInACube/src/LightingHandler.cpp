@@ -116,12 +116,22 @@ void LightingHandler::RenderLightingPass(
 	planeProg["matrixShadow"] = matrixShadowPlane;
 	planeProg["shadow"] = 1;
 
+	glActiveTexture(GL_TEXTURE0);
+	ltc1Texture.Bind(2);
+	planeProg["ltc1"] = 2;
+
+	ltc2Texture.Bind(3);
+	planeProg["ltc2"] = 3;
+
+	GLuint planePointsLoc = glGetUniformLocation(planeProg.GetID(), "lightPoints");
+	glUniform3fv(planePointsLoc, 4, &lightCameraCorners[0].x);
+
 	glBindVertexArray(planeVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	cy::Matrix4f viewProj = projMatrix * translationMatrix * cameraRot;
 	lightVisualProgram["mvp"] = viewProj;
-	lightVisualProgram["lightColor"] = cy::Vec3f(1.0f, 0.5f, 0.0f);
+	lightVisualProgram["lightColor"] = cy::Vec3f(0.0f, 1.0f, 0.8f);
 	glBindVertexArray(lightVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 

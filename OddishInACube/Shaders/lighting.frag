@@ -17,7 +17,7 @@ uniform sampler2D ltc2;
 
 const float roughness = 0.45; 
 const float intensity = 200.0;
-const vec3 lightColor = vec3(1.0, 0.5, 0.0);
+const vec3 lightColor = vec3(0.0, 1.0, 0.8);
 
 const float LUT_SCALE = (64.0 - 1.0) / 64.0;
 const float LUT_BIAS  = 0.5 / 64.0;
@@ -76,7 +76,6 @@ float LTC_Evaluate(vec3 N, vec3 V, vec3 P, mat3 Minv, vec3 points[4], bool twoSi
         prev = curr;
     }
 
-    // 5. Return final evaluation (safe to cull backfaces now)
     float res = m.z;
     if (!twoSided && res < 0.0) return 0.0;
     return abs(res) / (2.0 * 3.14159); // Finally divide by 2 * pi
