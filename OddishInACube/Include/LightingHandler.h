@@ -10,6 +10,9 @@ public:
 	cy::GLSLProgram prog;
 	cy::GLSLProgram planeProg;
 	cyGLTexture2D tex;
+	cyGLTexture2D ltc1Texture;
+	cyGLTexture2D ltc2Texture;
+	cy::Vec4f areaLightVertices[4];
 
 	void Initialize();
 

@@ -1,9 +1,29 @@
 #include "LightingHandler.h"
+#include "ltc_matrix.hpp"
 
 void LightingHandler::Initialize()
 {
 	prog.BuildFiles("Shaders/lighting.vert", "Shaders/lighting.frag");
 	planeProg.BuildFiles("Shaders/plane.vert", "Shaders/plane.frag");
+
+	// Setup LTC Inverse M Matrix
+	ltc1Texture.Initialize();
+	ltc1Texture.Bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 64, 64, 0, GL_RGBA, GL_FLOAT, LTC1);
+	ltc1Texture.SetFilteringMode(GL_LINEAR, GL_LINEAR);
+	ltc1Texture.SetWrappingMode(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	
+	// Setup LTC Texture for Fresnel
+	ltc2Texture.Initialize();
+	ltc2Texture.Bind();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 64, 64, 0, GL_RGBA, GL_FLOAT, LTC2);
+	ltc2Texture.SetFilteringMode(GL_LINEAR, GL_LINEAR);
+	ltc2Texture.SetWrappingMode(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+	areaLightVertices[0] = cy::Vec4f(20.0f, 10.0f, -5.0f, 1.0f); 
+	areaLightVertices[1] = cy::Vec4f(20.0f, 10.0f, 5.0f, 1.0f); 
+	areaLightVertices[2] = cy::Vec4f(20.0f, 20.0f, 5.0f, 1.0f);
+	areaLightVertices[3] = cy::Vec4f(20.0f, 20.0f, -5.0f, 1.0f);
 }
 
 void LightingHandler::RenderLightingPass(
@@ -20,12 +40,31 @@ void LightingHandler::RenderLightingPass(
 	prog["normalMatrix"] = normalMatrix;
 	prog["mv"] = mv;
 	prog["matrixShadow"] = matrixShadow;
+
+	cy::Vec3f lightCameraCorners[4];
+	for (int i = 0; i < 4; i++) {
+		lightCameraCorners[i] = cy::Vec3f(translationMatrix * cameraRot * areaLightVertices[i]);
+	}
+	GLuint pointsLoc = glGetUniformLocation(prog.GetID(), "lightPoints");
+	glUniform3fv(pointsLoc, 4, &lightCameraCorners[0].x);
+
+	GLuint roughnessLoc = glGetUniformLocation(prog.GetID(), "roughness");
+	glUniform1f(roughnessLoc, 0.3f); 
+
+
 	cy::Vec4f lightPosWorld(64.0f, 42.0f, 64.0f, 1.0f);
 	cy::Vec4f lightPosCamera = translationMatrix * cameraRot * lightPosWorld;
 	prog["lightPos"] = cy::Vec3f(lightPosCamera);
+
 	glActiveTexture(GL_TEXTURE0);
 	tex.Bind(0);
 	prog["tex"] = 0;
+
+	ltc1Texture.Bind(2);
+	prog["ltc1"] = 2;
+
+	ltc2Texture.Bind(3);
+	prog["ltc2"] = 3;
 
 
 	glViewport(0, 0, screenWidth, screenHeight);
