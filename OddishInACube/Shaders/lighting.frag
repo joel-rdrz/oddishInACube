@@ -10,7 +10,7 @@ in vec4 lightView_Position;
 uniform vec3 lightPos; 
 uniform vec3 lightPoints[4];
 
-uniform sampler2DShadow shadow;
+uniform sampler2D shadow;
 uniform sampler2D tex;
 uniform sampler2D ltc1;
 uniform sampler2D ltc2;
@@ -122,9 +122,8 @@ void main() {
     float bias = max(0.05 * (1.0 - dot(N, lightDir)), 0.005);
 
     vec3 projCoords = lightView_Position.xyz / lightView_Position.w;
-    projCoords.z -= bias; 
-
-    float shadowTerm = textureProj(shadow, vec4(projCoords.xy, projCoords.z, 1.0));
+    float shadowDepth = texture(shadow, projCoords.xy).r; 
+    float shadowTerm = (projCoords.z - bias <= shadowDepth) ? 1.0 : 0.0;
 
     vec3 ambient = textureColor * 0.05; 
     
