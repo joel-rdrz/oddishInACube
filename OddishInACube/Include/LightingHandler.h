@@ -13,6 +13,9 @@ public:
 	cyGLTexture2D ltc1Texture;
 	cyGLTexture2D ltc2Texture;
 	cy::Vec4f areaLightVertices[4];
+	cy::GLSLProgram lightVisualProgram;
+	GLuint lightVao;
+	GLuint lightVbo;
 
 	void Initialize();
 

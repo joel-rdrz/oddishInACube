@@ -5,6 +5,7 @@ void LightingHandler::Initialize()
 {
 	prog.BuildFiles("Shaders/lighting.vert", "Shaders/lighting.frag");
 	planeProg.BuildFiles("Shaders/plane.vert", "Shaders/plane.frag");
+	lightVisualProgram.BuildFiles("Shaders/light_visual.vert", "Shaders/light_visual.frag");
 
 	// Setup LTC Inverse M Matrix
 	ltc1Texture.Initialize();
@@ -19,11 +20,34 @@ void LightingHandler::Initialize()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 64, 64, 0, GL_RGBA, GL_FLOAT, LTC2);
 	ltc2Texture.SetFilteringMode(GL_LINEAR, GL_LINEAR);
 	ltc2Texture.SetWrappingMode(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	
+	float height = 12.0f;	
+	float angle = height * 0.707f; // 0.707 = sin(45)
 
-	areaLightVertices[0] = cy::Vec4f(20.0f, 10.0f, -5.0f, 1.0f); 
-	areaLightVertices[1] = cy::Vec4f(20.0f, 10.0f, 5.0f, 1.0f); 
-	areaLightVertices[2] = cy::Vec4f(20.0f, 20.0f, 5.0f, 1.0f);
-	areaLightVertices[3] = cy::Vec4f(20.0f, 20.0f, -5.0f, 1.0f);
+	areaLightVertices[0] = cy::Vec4f(64.0f + angle + 8.0f, 30.0f, 64.0f - angle + 8.0f, 1.0f);
+	areaLightVertices[1] = cy::Vec4f(64.0f - angle + 8.0f, 30.0f, 64.0f + angle + 8.0f, 1.0f);
+	areaLightVertices[2] = cy::Vec4f(64.0f - angle - 8.0f, 54.0f, 64.0f + angle - 8.0f, 1.0f);
+	areaLightVertices[3] = cy::Vec4f(64.0f + angle - 8.0f, 54.0f, 64.0f - angle - 8.0f, 1.0f);
+
+	float physicalLightVertices[] = {
+		areaLightVertices[0].x, areaLightVertices[0].y, areaLightVertices[0].z,
+		areaLightVertices[1].x, areaLightVertices[1].y, areaLightVertices[1].z,
+		areaLightVertices[2].x, areaLightVertices[2].y, areaLightVertices[2].z,
+
+		areaLightVertices[0].x, areaLightVertices[0].y, areaLightVertices[0].z,
+		areaLightVertices[2].x, areaLightVertices[2].y, areaLightVertices[2].z,
+		areaLightVertices[3].x, areaLightVertices[3].y, areaLightVertices[3].z
+	};
+
+	glGenVertexArrays(1, &lightVao);
+	glBindVertexArray(lightVao);
+
+	glGenBuffers(1, &lightVbo);
+	glBindBuffer(GL_ARRAY_BUFFER, lightVbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(physicalLightVertices), physicalLightVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
 }
 
 void LightingHandler::RenderLightingPass(
@@ -93,6 +117,12 @@ void LightingHandler::RenderLightingPass(
 	planeProg["shadow"] = 1;
 
 	glBindVertexArray(planeVao);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	cy::Matrix4f viewProj = projMatrix * translationMatrix * cameraRot;
+	lightVisualProgram["mvp"] = viewProj;
+	lightVisualProgram["lightColor"] = cy::Vec3f(1.0f, 0.5f, 0.0f);
+	glBindVertexArray(lightVao);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 }

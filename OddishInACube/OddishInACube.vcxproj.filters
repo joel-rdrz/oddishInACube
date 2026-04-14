@@ -43,12 +43,19 @@
     <None Include="Shaders\shadow.vert" />
     <None Include="Shaders\cube.frag" />
     <None Include="Shaders\cube.vert" />
+    <None Include="Shaders\sat.frag" />
+    <None Include="Shaders\sat.vert" />
+    <None Include="light_visual.frag" />
+    <None Include="light_visual.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\GlassCube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\ShadowMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\LightingHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

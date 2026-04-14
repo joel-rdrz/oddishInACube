@@ -141,6 +141,8 @@
     <ClCompile Include="src\WaterHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="light_visual.frag" />
+    <None Include="light_visual.vert" />
     <None Include="Shaders\cube.frag" />
     <None Include="Shaders\cube.vert" />
     <None Include="Shaders\lighting.frag" />

@@ -16,7 +16,7 @@ uniform sampler2D ltc1;
 uniform sampler2D ltc2;
 
 const float roughness = 0.45; 
-const float intensity = 40.0;
+const float intensity = 200.0;
 const vec3 lightColor = vec3(1.0, 0.5, 0.0);
 
 const float LUT_SCALE = (64.0 - 1.0) / 64.0;
