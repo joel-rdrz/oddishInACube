@@ -70,7 +70,7 @@ void WaterHandler::RenderWater(cy::Matrix4f projMatrix, cy::Matrix4f viewMatrix,
 	glActiveTexture(GL_TEXTURE0);
 	noiseTex.Bind(0);
 	waterProg["noiseTex"] = 0;
-	waterProg["scale"] = 0.3f;
+	waterProg["scale"] = 0.35f;
 	glBindVertexArray(waterVao);
 	glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 }

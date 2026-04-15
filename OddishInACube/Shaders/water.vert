@@ -58,7 +58,7 @@ void main()
     worldPos.y += getWaveHeight(worldPos.x, worldPos.z);
 
 	// Nandhini this is finite differences!! 3200 coming in handy
-	float deltaT = 0.05; 
+	float deltaT = 0.2; 
 	float heightLeft = getWaveHeight(worldPos.x - deltaT, worldPos.z);
 	float heightRight = getWaveHeight(worldPos.x + deltaT, worldPos.z);
 	float heightDown = getWaveHeight(worldPos.x, worldPos.z - deltaT);

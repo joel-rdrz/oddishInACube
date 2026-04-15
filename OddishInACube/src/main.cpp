@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 	glutInitWindowSize(screenWidth, screenHeight);
 	glutInitWindowPosition(100, 100);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
-	glutCreateWindow("Shadow Mapping 5610 Project 7");
+	glutCreateWindow("Oddish in a Cube");
 	glutDisplayFunc(myDisplay);
 	glutKeyboardFunc(myKeyboard);
 	glutReshapeFunc(myReshape);
