@@ -116,7 +116,7 @@ void main() {
     float diffEval = LTC_Evaluate(N, V, P, identity, correctLightPoints, false);
     vec3 diffuse = vec3(diffEval);
 
-    vec3 textureColor = pow(texture(tex, texCoord).rgb, vec3(2.2));
+    vec3 textureColor = pow(texture(tex, texCoord).rgb, vec3(2.3));
     vec3 lightDir = normalize(lightPos - P);
     float bias = max(0.05 * (1.0 - dot(N, lightDir)), 0.005);
 
@@ -131,7 +131,7 @@ void main() {
     
     finalColor = finalColor / (finalColor + vec3(1.0)); 
 
-    finalColor = pow(finalColor, vec3(1.0 / 2.2)); 
+    finalColor = pow(finalColor, vec3(1.0 / 2.3)); 
 
     color = vec4(finalColor, 1.0);
 }
